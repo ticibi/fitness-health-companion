@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fitness Companion</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+        body {
+            background: #121212;
+            color: #e0e0e0;
+            line-height: 1.6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .app-container {
+            width: 768px;
+            height: 1024px;
+            background: #1e1e1e;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+            overflow: hidden;
+            display: flex;
+            position: relative;
+        }
+        .sidebar {
+            width: 200px;
+            background: #252525;
+            padding: 20px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s ease;
+        }
+        .sidebar h1 {
+            color: #3f51b5;
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .sidebar ul {
+            list-style: none;
+            flex-grow: 1;
+        }
+        .sidebar li {
+            padding: 15px;
+            cursor: pointer;
+            transition: background 0.3s ease, transform 0.2s ease;
+            border-radius: 8px;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+        }
+        .sidebar li:hover {
+            background: #3f51b5;
+            transform: translateX(5px);
+        }
+        .sidebar li.active {
+            background: #3f51b5;
+            color: #fff;
+        }
+        .sidebar li img {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+            filter: invert(1);
+        }
+        .sidebar li.active img, .sidebar li:hover img {
+            filter: invert(0);
+        }
+        .sidebar .simulate-btn, .sidebar .reset-btn {
+            margin-top: 10px;
+            padding: 10px;
+            background: #3f51b5;
+            border: none;
+            border-radius: 8px;
+            color: #fff;
+            text-align: center;
+            cursor: pointer;
+            transition: background 0.3s ease, transform 0.2s ease;
+        }
+        .sidebar .simulate-btn:hover, .sidebar .reset-btn:hover {
+            background: #303f9f;
+            transform: scale(1.05);
+        }
+        .sidebar .reset-btn {
+            background: #d32f2f;
+        }
+        .sidebar .reset-btn:hover {
+            background: #b71c1c;
+        }
+        .header {
+            position: absolute;
+            top: 0;
+            left: 200px;
+            right: 0;
+            background: #1e1e1e;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #3f51b5;
+            z-index: 10;
+        }
+        .xp-bar-container {
+            width: 200px;
+            height: 10px;
+            background: #333;
+            border-radius: 5px;
+            overflow: hidden;
+            position: relative;
+        }
+        .xp-bar {
+            height: 100%;
+            background: #3f51b5;
+            width: 0;
+            transition: width 1s ease;
+            position: relative;
+        }
+        .xp-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: glimmer 1.5s infinite;
+            display: none;
+        }
+        @keyframes glimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        .content {
+            margin-left: 10px;
+            padding: 60px 0 0 0;
+            width: 90%;
+            height: 100%;
+            overflow-y: auto;
+            background: #1e1e1e;
+        }
+        .page {
+            display: none;
+            animation: fadeIn 0.5s ease;
+            padding: 20px;
+            min-height: calc(100% - 60px);
+        }
+        .page.active {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .section {
+            background: #252525;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+            transition: transform 0.3s ease;
+            width: 100%;
+        }
+        .section:hover {
+            transform: translateY(-5px);
+        }
+        h2 {
+            color: #3f51b5;
+            font-size: 1.5em;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .task {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background: #333;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            transition: transform 0.2s ease, background 0.3s ease;
+        }
+        .task:hover {
+            transform: scale(1.02);
+            background: #3f51b5;
+        }
+        .task span {
+            flex-grow: 1;
+        }
+        .task button {
+            background: none;
+            border: none;
+            font-size: 1.5em;
+            cursor: pointer;
+            margin-left: 10px;
+            transition: color 0.2s ease, transform 0.2s ease;
+        }
+        .task button:hover {
+            color: #3f51b5;
+            transform: scale(1.2);
+        }
+        .comment-box {
+            display: none;
+            margin-top: 10px;
+        }
+        .comment-box input, .form input, .form select {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            background: #333;
+            color: #e0e0e0;
+            margin-bottom: 10px;
+            transition: background 0.3s ease;
+        }
+        .comment-box input:focus, .form input:focus, .form select:focus {
+            background: #444;
+            outline: none;
+        }
+        .comment-box button, .form button {
+            padding: 10px 20px;
+            background: #3f51b5;
+            border: none;
+            border-radius: 8px;
+            color: #fff;
+            cursor: pointer;
+            transition: background 0.3s ease, transform 0.2s ease;
+        }
+        .comment-box button:hover, .form button:hover {
+            background: #303f9f;
+            transform: scale(1.05);
+        }
+        .notification {
+            position: absolute;
+            top: 60px;
+            right: 20px;
+            background: #3f51b5;
+            padding: 10px 20px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+            display: none;
+            animation: fadeOut 3s forwards;
+        }
+        @keyframes fadeOut {
+            0% { opacity: 1; }
+            80% { opacity: 1; }
+            100% { opacity: 0; display: none; }
+        }
+        canvas {
+            width: 100%;
+            background: #333;
+            border-radius: 8px;
+            padding: 10px;
+        }
+        .avatar {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .avatar img {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: 3px solid #3f51b5;
+            transition: transform 0.3s ease;
+        }
+        .avatar img:hover {
+            transform: rotate(360deg);
+        }
+        .light-mode {
+            background: #f5f5f5;
+            color: #333;
+        }
+        .light-mode .app-container, .light-mode .header, .light-mode .content {
+            background: #fff;
+        }
+        .light-mode .sidebar, .light-mode .section {
+            background: #e0e0e0;
+        }
+        .light-mode .task, .light-mode .comment-box input, .light-mode .form input, .light-mode .form select {
+            background: #d0d0d0;
+        }
+        .light-mode .xp-bar-container {
+            background: #b0b0b0;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="sidebar">
+            <div class="avatar">
+                <img src="https://cdn-icons-png.flaticon.com/128/2964/2964514.png" alt="Avatar">
+            </div>
+            <h1>Fitness Companion</h1>
+            <ul>
+                <li class="active" data-page="tasks"><img src="https://cdn-icons-png.flaticon.com/128/1057/1057090.png" alt="Tasks Icon">Tasks</li>
+                <li data-page="workouts"><img src="https://cdn-icons-png.flaticon.com/128/3062/3062634.png" alt="Workouts Icon">Workouts</li>
+                <li data-page="food"><img src="https://cdn-icons-png.flaticon.com/128/1046/1046784.png" alt="Food Icon">Food</li>
+                <li data-page="measurements"><img src="https://cdn-icons-png.flaticon.com/128/2281/2281490.png" alt="Measurements Icon">Measurements</li>
+                <li data-page="history"><img src="https://cdn-icons-png.flaticon.com/128/3503/3503755.png" alt="History Icon">History</li>
+                <li data-page="account"><img src="https://cdn-icons-png.flaticon.com/128/1077/1077063.png" alt="Account Icon">Account</li>
+                <li data-page="settings"><img src="https://cdn-icons-png.flaticon.com/128/124/124033.png" alt="Settings Icon">Settings</li>
+            </ul>
+            <button class="simulate-btn" onclick="simulateDays()">Simulate Days</button>
+            <button class="reset-btn" onclick="resetData()">Reset Data</button>
+        </div>
+
+        <div class="header">
+            <span>Level: <span id="level">1</span></span>
+            <div class="xp-bar-container">
+                <div class="xp-bar" id="xpBar"></div>
+            </div>
+            <span>XP: <span id="xp">0</span>/<span id="xpMax">100</span></span>
+        </div>
+
+        <div class="content">
+            <div class="page active" id="tasks">
+                <div class="section">
+                    <h2>Today's Tasks</h2>
+                    <div class="task" data-id="1">
+                        <span>4:00 PM: FlavCity Shake (30g P)</span>
+                        <button class="done">✅</button>
+                        <button class="not-done">❌</button>
+                        <div class="comment-box">
+                            <input type="text" placeholder="What did you do instead?">
+                            <button>Submit</button>
+                        </div>
+                    </div>
+                    <div class="task" data-id="2">
+                        <span>6:00 PM: Chest - Incline DB Press (3x8-12)</span>
+                        <button class="done">✅</button>
+                        <button class="not-done">❌</button>
+                        <div class="comment-box">
+                            <input type="text" placeholder="What did you do instead?">
+                            <button>Submit</button>
+                        </div>
+                    </div>
+                    <div class="task" data-id="3">
+                        <span>6:30 PM: Stretch - Hamstring (2x30s/leg)</span>
+                        <button class="done">✅</button>
+                        <button class="not-done">❌</button>
+                        <div class="comment-box">
+                            <input type="text" placeholder="What did you do instead?">
+                            <button>Submit</button>
+                        </div>
+                    </div>
+                    <div class="task" data-id="4">
+                        <span>6:45 PM: Dinner (8oz chicken, 150g rice)</span>
+                        <button class="done">✅</button>
+                        <button class="not-done">❌</button>
+                        <div class="comment-box">
+                            <input type="text" placeholder="What did you eat instead?">
+                            <button>Submit</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="page" id="workouts">
+                <div class="section">
+                    <h2>Log Workout</h2>
+                    <div class="form">
+                        <input type="text" id="exercise" placeholder="Exercise (e.g., Pull-Ups)">
+                        <input type="number" id="sets" placeholder="Sets">
+                        <input type="number" id="reps" placeholder="Reps">
+                        <button onclick="logWorkout()">Log</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="page" id="food">
+                <div class="section">
+                    <h2>Log Food</h2>
+                    <div class="form">
+                        <input type="text" id="food" placeholder="Food (e.g., Chicken)">
+                        <input type="number" id="protein" placeholder="Protein (g)">
+                        <input type="number" id="carbs" placeholder="Carbs (g)">
+                        <input type="number" id="fat" placeholder="Fat (g)">
+                        <input type="number" id="water" placeholder="Water (oz)">
+                        <button onclick="logFood()">Log</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="page" id="measurements">
+                <div class="section">
+                    <h2>Update Measurements</h2>
+                    <div class="form">
+                        <input type="number" id="weight" placeholder="Weight" step="0.1">
+                        <input type="number" id="chest" placeholder="Chest (in)" step="0.1">
+                        <input type="number" id="biceps" placeholder="Biceps (in)" step="0.1">
+                        <input type="number" id="waist" placeholder="Waist (in)" step="0.1">
+                        <input type="number" id="handstand" placeholder="Handstand (sec)">
+                        <input type="time" id="wake" placeholder="Wake Time">
+                        <input type="time" id="bed" placeholder="Bed Time">
+                        <button onclick="logMeasurements()">Update</button>
+                    </div>
+                </div>
+                <div class="section">
+                    <h2>Measurement Trends</h2>
+                    <canvas id="measurementChart"></canvas>
+                </div>
+            </div>
+
+            <div class="page" id="history">
+                <div class="section">
+                    <h2>History</h2>
+                    <ul id="historyList"></ul>
+                </div>
+                <div class="section">
+                    <h2>Consistency</h2>
+                    <canvas id="consistencyChart"></canvas>
+                </div>
+            </div>
+
+            <div class="page" id="account">
+                <div class="section">
+                    <h2>Account</h2>
+                    <div class="form">
+                        <input type="text" id="username" placeholder="Username" value="User123">
+                        <input type="email" id="email" placeholder="Email" value="user@example.com">
+                        <input type="text" id="joined" placeholder="Joined" value="March 20, 2025" disabled>
+                        <button onclick="updateAccount()">Save</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="page" id="settings">
+                <div class="section">
+                    <h2>Settings</h2>
+                    <div class="form">
+                        <label>Theme Color</label>
+                        <select id="themeColor">
+                            <option value="#3f51b5" selected>Blue/Indigo</option>
+                            <option value="#f44336">Red</option>
+                            <option value="#4caf50">Green</option>
+                        </select>
+                        <label>Weight Unit</label>
+                        <select id="weightUnit">
+                            <option value="lbs" selected>Pounds (lbs)</option>
+                            <option value="kg">Kilograms (kg)</option>
+                        </select>
+                        <label>Display Mode</label>
+                        <select id="displayMode">
+                            <option value="dark" selected>Dark</option>
+                            <option value="light">Light</option>
+                        </select>
+                        <label>Notification Frequency</label>
+                        <select id="notifFreq">
+                            <option value="daily" selected>Daily</option>
+                            <option value="hourly">Hourly</option>
+                            <option value="off">Off</option>
+                        </select>
+                        <button onclick="applySettings()">Apply</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="notification" id="notification"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Request Notification Permission
+        if (Notification.permission !== "granted") Notification.requestPermission();
+
+        // Navigation
+        const pages = document.querySelectorAll('.page');
+        document.querySelectorAll('.sidebar li').forEach(li => {
+            li.addEventListener('click', function() {
+                document.querySelector('.sidebar li.active').classList.remove('active');
+                this.classList.add('active');
+                pages.forEach(page => page.classList.remove('active'));
+                document.getElementById(this.dataset.page).classList.add('active');
+            });
+        });
+
+        // Data Storage
+        let xp = 0, level = 1, streak = 0;
+        let history = [];
+        let workouts = [];
+        let foodLog = [];
+        let measurements = [{ date: new Date('2025-03-20').toISOString(), weight: 177, chest: 43, biceps: 13, waist: 35, handstand: 0, wake: '07:00', bed: '23:00', unit: 'lbs' }];
+        let account = { username: 'User123', email: 'user@example.com', joined: 'March 20, 2025' };
+
+        function loadData() {
+            const saved = localStorage.getItem('fitnessCompanionData');
+            if (saved) {
+                const data = JSON.parse(saved);
+                xp = data.xp || 0;
+                level = data.level || 1;
+                streak = data.streak || 0;
+                history = data.history || [];
+                workouts = data.workouts || [];
+                foodLog = data.foodLog || [];
+                measurements = data.measurements || measurements;
+                account = data.account || account;
+                document.getElementById('username').value = account.username;
+                document.getElementById('email').value = account.email;
+                updateXPBar();
+                updateHistory();
+                updateCharts();
+            }
+        }
+
+        function saveData() {
+            const data = { xp, level, streak, history, workouts, foodLog, measurements, account };
+            localStorage.setItem('fitnessCompanionData', JSON.stringify(data));
+        }
+
+        function resetData() {
+            localStorage.clear();
+            xp = 0;
+            level = 1;
+            streak = 0;
+            history = [];
+            workouts = [];
+            foodLog = [];
+            measurements = [{ date: new Date('2025-03-20').toISOString(), weight: 177, chest: 43, biceps: 13, waist: 35, handstand: 0, wake: '07:00', bed: '23:00', unit: 'lbs' }];
+            account = { username: 'User123', email: 'user@example.com', joined: 'March 20, 2025' };
+            document.getElementById('username').value = account.username;
+            document.getElementById('email').value = account.email;
+            updateXPBar();
+            updateHistory();
+            updateCharts();
+            showNotification('Data reset!');
+            sendDesktopNotification('Data Reset', 'All data has been cleared.');
+        }
+
+        // Leveling System
+        const levelThresholds = [
+            100,  // Level 1 -> 2
+            250,  // Level 2 -> 3
+            450,  // Level 3 -> 4
+            700,  // Level 4 -> 5
+            1000, // Level 5 -> 6
+            1350, // Level 6 -> 7
+            1750, // Level 7 -> 8
+            2200, // Level 8 -> 9
+            2700, // Level 9 -> 10
+            3250  // Level 10 -> 11
+        ];
+
+        function getXPThreshold(currentLevel) {
+            return levelThresholds[currentLevel - 1] || levelThresholds[levelThresholds.length - 1] + (currentLevel - 10) * 550;
+        }
+
+        function updateXPBar() {
+            let xpMax = getXPThreshold(level);
+            while (xp >= xpMax && level < levelThresholds.length + 1) {
+                xp -= xpMax;
+                level++;
+                xpMax = getXPThreshold(level);
+                showNotification(`Level Up! Now Level ${level}`);
+                sendDesktopNotification('Level Up', `Congrats! You’re now Level ${level}`);
+            }
+            document.getElementById('xp').textContent = Math.floor(xp);
+            document.getElementById('xpMax').textContent = xpMax;
+            document.getElementById('level').textContent = level;
+            const xpBar = document.getElementById('xpBar');
+            const percentage = (xp / xpMax) * 100;
+            xpBar.style.width = `${Math.min(percentage, 100)}%`;
+            xpBar.querySelector('::after').style.display = 'block';
+            setTimeout(() => xpBar.querySelector('::after').style.display = 'none', 1500);
+        }
+
+        function addXP(amount) {
+            xp += amount;
+            showNotification(`+${amount} XP!`);
+            updateXPBar();
+            saveData();
+        }
+
+        function checkStreakBonus() {
+            if (streak % 5 === 0) {
+                addXP(50);
+                showNotification(`Streak Bonus! +50 XP for ${streak} tasks in a row!`);
+                sendDesktopNotification('Streak Bonus', `+50 XP for ${streak} tasks!`);
+            }
+        }
+
+        // Task Interaction
+        document.querySelectorAll('.done, .not-done').forEach(button => {
+            button.addEventListener('click', function() {
+                const task = this.parentElement;
+                const commentBox = task.querySelector('.comment-box');
+                if (this.classList.contains('done')) {
+                    task.style.background = '#1a3c1a';
+                    commentBox.style.display = 'none';
+                    logTask(task.dataset.id, true);
+                    addXP(25); // XP for completing a daily task
+                    streak++;
+                    checkStreakBonus();
+                } else {
+                    task.style.background = '#3c1a1a';
+                    commentBox.style.display = 'block';
+                    streak = 0;
+                }
+            });
+        });
+
+        document.querySelectorAll('.comment-box button').forEach(button => {
+            button.addEventListener('click', function() {
+                const task = this.closest('.task');
+                const comment = task.querySelector('input').value;
+                logTask(task.dataset.id, false, comment);
+                task.querySelector('.comment-box').style.display = 'none';
+                task.querySelector('input').value = '';
+                streak = 0;
+            });
+        });
+
+        function logTask(id, completed, comment = '') {
+            const responses = {
+                1: completed ? 'Shake logged—30g P!' : `Noted: ${comment}.`,
+                2: completed ? 'Chest gains!' : `Missed: ${comment}.`,
+                3: completed ? 'Flexibility up!' : `Skipped: ${comment}.`,
+                4: completed ? 'Dinner on point!' : `Ate ${comment}.`
+            };
+            const message = `Grok: ${responses[id]}`;
+            showNotification(message);
+            sendDesktopNotification('Task Update', message);
+            history.push({ type: 'task', date: new Date().toISOString(), task: taskText(id), completed, comment });
+            updateHistory();
+            saveData();
+        }
+
+        function taskText(id) {
+            return document.querySelector(`.task[data-id="${id}"] span`).textContent;
+        }
+
+        // Notifications
+        function showNotification(message) {
+            const notif = document.getElementById('notification');
+            notif.textContent = message;
+            notif.style.display = 'block';
+            setTimeout(() => notif.style.display = 'none', 3000);
+        }
+
+        function sendDesktopNotification(title, body) {
+            if (Notification.permission === "granted") new Notification(title, { body });
+        }
+
+        // Workout Logging
+        function logWorkout() {
+            const exercise = document.getElementById('exercise').value;
+            const sets = document.getElementById('sets').value;
+            const reps = document.getElementById('reps').value;
+            workouts.push({ date: new Date().toISOString(), exercise, sets, reps });
+            const message = `Logged ${exercise}: ${sets}x${reps}`;
+            showNotification(message);
+            sendDesktopNotification('Workout Logged', message);
+            history.push({ type: 'workout', date: new Date().toISOString(), task: `${exercise}: ${sets}x${reps}`, completed: true });
+            updateHistory();
+            addXP(15); // XP for submitting a log
+            streak++;
+            checkStreakBonus();
+            clearForm('workouts');
+            saveData();
+        }
+
+        // Food Logging
+        function logFood() {
+            const food = document.getElementById('food').value;
+            const protein = document.getElementById('protein').value;
+            const carbs = document.getElementById('carbs').value;
+            const fat = document.getElementById('fat').value;
+            const water = document.getElementById('water').value;
+            foodLog.push({ date: new Date().toISOString(), food, protein, carbs, fat, water });
+            const message = `Logged ${food}: ${protein}g P, ${carbs}g C, ${fat}g F, ${water}oz Water`;
+            showNotification(message);
+            sendDesktopNotification('Food Logged', message);
+            history.push({ type: 'food', date: new Date().toISOString(), task: `${food}: ${protein}g P, ${carbs}g C, ${fat}g F, ${water}oz Water`, completed: true });
+            updateHistory();
+            addXP(15); // XP for submitting a log
+            streak++;
+            checkStreakBonus();
+            clearForm('food');
+            saveData();
+        }
+
+        // Measurements Logging
+        function logMeasurements() {
+            const unit = document.getElementById('weightUnit')?.value || 'lbs';
+            const data = {
+                date: new Date().toISOString(),
+                weight: document.getElementById('weight').value || measurements[measurements.length-1].weight,
+                chest: document.getElementById('chest').value || measurements[measurements.length-1].chest,
+                biceps: document.getElementById('biceps').value || measurements[measurements.length-1].biceps,
+                waist: document.getElementById('waist').value || measurements[measurements.length-1].waist,
+                handstand: document.getElementById('handstand').value || measurements[measurements.length-1].handstand,
+                wake: document.getElementById('wake').value || measurements[measurements.length-1].wake,
+                bed: document.getElementById('bed').value || measurements[measurements.length-1].bed,
+                unit
+            };
+            measurements.push(data);
+            const message = 'Measurements updated!';
+            showNotification(message);
+            sendDesktopNotification('Measurements Updated', message);
+            history.push({ type: 'measurement', date: new Date().toISOString(), task: `Weight: ${data.weight}${unit}, Chest: ${data.chest}in, Biceps: ${data.biceps}in, Waist: ${data.waist}in, Handstand: ${data.handstand}s, Wake: ${data.wake}, Bed: ${data.bed}`, completed: true });
+            updateHistory();
+            addXP(15); // XP for submitting a log
+            streak++;
+            checkStreakBonus();
+            clearForm('measurements');
+            updateCharts();
+            saveData();
+        }
+
+        function clearForm(pageId) {
+            document.querySelector(`#${pageId} .form`).reset();
+        }
+
+        // History Update
+        function updateHistory() {
+            const list = document.getElementById('historyList');
+            list.innerHTML = '';
+            history.forEach(entry => {
+                const li = document.createElement('li');
+                li.textContent = `${new Date(entry.date).toLocaleString()}: [${entry.type.toUpperCase()}] ${entry.task} - ${entry.completed ? '✅' : '❌'}${entry.comment ? ` (${entry.comment})` : ''}`;
+                list.appendChild(li);
+            });
+            updateConsistencyChart();
+        }
+
+        // Charts
+        let measurementChart, consistencyChart;
+        function updateCharts() {
+            const ctx1 = document.getElementById('measurementChart').getContext('2d');
+            if (measurementChart) measurementChart.destroy();
+            measurementChart = new Chart(ctx1, {
+                type: 'line',
+                data: {
+                    labels: measurements.map(m => new Date(m.date).toLocaleDateString()),
+                    datasets: [
+                        { label: `Weight (${measurements[0].unit})`, data: measurements.map(m => m.weight), borderColor: '#3f51b5', fill: false },
+                        { label: 'Chest (in)', data: measurements.map(m => m.chest), borderColor: '#81d4fa', fill: false },
+                        { label: 'Biceps (in)', data: measurements.map(m => m.biceps), borderColor: '#ffca28', fill: false },
+                        { label: 'Waist (in)', data: measurements.map(m => m.waist), borderColor: '#ef5350', fill: false },
+                        { label: 'Handstand (sec)', data: measurements.map(m => m.handstand), borderColor: '#ab47bc', fill: false }
+                    ]
+                },
+                options: { scales: { y: { beginAtZero: false } } }
+            });
+
+            const ctx2 = document.getElementById('consistencyChart').getContext('2d');
+            if (consistencyChart) consistencyChart.destroy();
+            const completed = history.filter(h => h.completed).length;
+            consistencyChart = new Chart(ctx2, {
+                type: 'bar',
+                data: {
+                    labels: ['Tasks Completed'],
+                    datasets: [{ label: 'Consistency', data: [completed / history.length * 100 || 0], backgroundColor: '#3f51b5' }]
+                },
+                options: { scales: { y: { max: 100, beginAtZero: true } } }
+            });
+        }
+
+        // Simulate Days
+        function simulateDays() {
+            const days = 3;
+            for (let i = 1; i <= days; i++) {
+                const date = new Date();
+                date.setDate(date.getDate() - (days - i));
+                history.push({ type: 'task', date: date.toISOString(), task: '4:00 PM: FlavCity Shake (30g P)', completed: true });
+                history.push({ type: 'task', date: date.toISOString(), task: '6:00 PM: Chest - Incline DB Press (3x8-12)', completed: i % 2 === 0, comment: i % 2 === 1 ? 'Did push-ups instead' : '' });
+                history.push({ type: 'task', date: date.toISOString(), task: '6:30 PM: Stretch - Hamstring (2x30s/leg)', completed: true });
+                history.push({ type: 'task', date: date.toISOString(), task: '6:45 PM: Dinner (8oz chicken, 150g rice)', completed: i !== 2, comment: i === 2 ? 'Ate pizza' : '' });
+                workouts.push({ date: date.toISOString(), exercise: 'Pull-Ups', sets: 3, reps: 8 + i });
+                history.push({ type: 'workout', date: date.toISOString(), task: `Pull-Ups: 3x${8 + i}`, completed: true });
+                workouts.push({ date: date.toISOString(), exercise: 'Goblet Squats', sets: 3, reps: 12 });
+                history.push({ type: 'workout', date: date.toISOString(), task: `Goblet Squats: 3x12`, completed: true });
+                foodLog.push({ date: date.toISOString(), food: 'FlavCity Shake', protein: 30, carbs: 5, fat: 5, water: 32 });
+                history.push({ type: 'food', date: date.toISOString(), task: `FlavCity Shake: 30g P, 5g C, 5g F, 32oz Water`, completed: true });
+                foodLog.push({ date: date.toISOString(), food: 'Chicken & Rice', protein: 60, carbs: 100, fat: 20, water: 16 });
+                history.push({ type: 'food', date: date.toISOString(), task: `Chicken & Rice: 60g P, 100g C, 20g F, 16oz Water`, completed: true });
+                if (i === 2) {
+                    foodLog.push({ date: date.toISOString(), food: 'Pizza', protein: 30, carbs: 80, fat: 40, water: 8 });
+                    history.push({ type: 'food', date: date.toISOString(), task: `Pizza: 30g P, 80g C, 40g F, 8oz Water`, completed: true });
+                }
+                measurements.push({
+                    date: date.toISOString(),
+                    weight: 177 - (i * 0.5),
+                    chest: 43 + (i * 0.2),
+                    biceps: 13 + (i * 0.1),
+                    waist: 35 - (i * 0.3),
+                    handstand: i * 5,
+                    wake: '07:00',
+                    bed: '23:00',
+                    unit: 'lbs'
+                });
+                history.push({ type: 'measurement', date: date.toISOString(), task: `Weight: ${177 - (i * 0.5)}lbs, Chest: ${43 + (i * 0.2)}in, Biceps: ${13 + (i * 0.1)}in, Waist: ${35 - (i * 0.3)}in, Handstand: ${i * 5}s, Wake: 07:00, Bed: 23:00`, completed: true });
+                addXP(100); // 25 per task * 4 tasks
+                addXP(45);  // 15 per log * 3 logs (2 workouts, 1 food)
+                streak += 4;
+                checkStreakBonus();
+            }
+            updateHistory();
+            updateCharts();
+            showNotification(`Simulated ${days} days of progress!`);
+            sendDesktopNotification('Simulation Complete', `Added ${days} days of data!`);
+        }
+
+        // Account Update
+        function updateAccount() {
+            account.username = document.getElementById('username').value;
+            account.email = document.getElementById('email').value;
+            saveData();
+            showNotification('Account updated!');
+            sendDesktopNotification('Account Updated', 'Your profile has been saved.');
+        }
+
+        // Settings
+        function applySettings() {
+            const color = document.getElementById('themeColor').value;
+            document.querySelectorAll('.sidebar li.active, .sidebar li:hover, .task:hover, .comment-box button, .form button, .notification, .xp-bar, h2, .sidebar .simulate-btn, .sidebar h1, .header, .avatar img').forEach(el => {
+                if (el.tagName === 'H1' || el.tagName === 'H2') el.style.color = color;
+                else if (el.classList.contains('header')) el.style.borderBottomColor = color;
+                else if (el.tagName === 'IMG') el.style.borderColor = color;
+                else el.style.background = color;
+            });
+            document.querySelectorAll('.task button:hover').forEach(el => el.style.color = color);
+
+            const mode = document.getElementById('displayMode').value;
+            if (mode === 'light') document.body.classList.add('light-mode');
+            else document.body.classList.remove('light-mode');
+
+            saveData();
+            showNotification('Settings applied!');
+        }
+
+        // Initialize
+        loadData();
+        updateCharts();
+        scheduleTaskNotifications();
+
+        function scheduleTaskNotifications() {
+            const now = new Date();
+            const tasks = [
+                { time: '16:00', message: 'Time for your FlavCity Shake!' },
+                { time: '18:00', message: 'Chest workout time—Incline DB Press!' },
+                { time: '18:30', message: 'Stretch those hamstrings!' },
+                { time: '18:45', message: 'Dinner time—8oz chicken, 150g rice!' }
+            ];
+            tasks.forEach(task => {
+                const [hours, minutes] = task.time.split(':');
+                const taskTime = new Date(now);
+                taskTime.setHours(hours, minutes, 0, 0);
+                const delay = taskTime - now;
+                if (delay > 0) {
+                    setTimeout(() => sendDesktopNotification('Task Reminder', task.message), delay);
+                }
+            });
+        }
+    </script>
+</body>
+</html>
