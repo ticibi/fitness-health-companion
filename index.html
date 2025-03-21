@@ -43,6 +43,27 @@
             top: 0;
             z-index: 20;
         }
+        .sidebar.collapsed {
+            width: 60px;
+            padding: 20px 10px;
+        }
+        .sidebar.collapsed h1,
+        .sidebar.collapsed li span,
+        .sidebar.collapsed .simulate-btn,
+        .sidebar.collapsed .reset-btn {
+            display: none;
+        }
+        .sidebar.collapsed li {
+            justify-content: center;
+            padding: 10px;
+        }
+        .sidebar.collapsed li img {
+            margin-right: 0;
+        }
+        .sidebar.collapsed .avatar img {
+            width: 40px;
+            height: 40px;
+        }
         .sidebar h1 {
             color: #3f51b5;
             font-size: 1.5em;
@@ -67,6 +88,9 @@
         .sidebar li:hover {
             background: #3f51b5;
             transform: translateX(5px);
+        }
+        .sidebar.collapsed li:hover {
+            transform: none;
         }
         .sidebar li.active {
             background: #3f51b5;
@@ -102,6 +126,31 @@
         .sidebar .reset-btn:hover {
             background: #b71c1c;
         }
+        .toggle-arrow {
+            position: absolute;
+            top: 50%;
+            right: -15px;
+            background: #3f51b5;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 25;
+            transition: transform 0.3s ease;
+        }
+        .toggle-arrow img {
+            width: 15px;
+            height: 15px;
+            filter: invert(1);
+            transition: transform 0.3s ease;
+        }
+        .sidebar.collapsed .toggle-arrow img {
+            transform: rotate(180deg);
+        }
         .menu-toggle {
             display: none;
             position: absolute;
@@ -131,6 +180,10 @@
             align-items: center;
             border-bottom: 1px solid #3f51b5;
             z-index: 10;
+            transition: left 0.3s ease;
+        }
+        .header.collapsed {
+            left: 60px;
         }
         .xp-bar-container {
             width: 200px;
@@ -170,6 +223,10 @@
             background: #1e1e1e;
             padding-top: 60px;
             transition: margin-left 0.3s ease, width 0.3s ease;
+        }
+        .content.collapsed {
+            margin-left: 60px;
+            width: calc(100% - 60px);
         }
         .page {
             display: none;
@@ -332,7 +389,15 @@
             .sidebar.active {
                 left: 0; /* Show when active */
             }
+            .sidebar.collapsed {
+                left: -200px; /* Ensure collapsed state doesn't affect mobile */
+                width: 200px;
+            }
             .content {
+                margin-left: 0;
+                width: 100%;
+            }
+            .content.collapsed {
                 margin-left: 0;
                 width: 100%;
             }
@@ -340,8 +405,14 @@
                 left: 0;
                 padding: 10px 60px 10px 60px; /* Space for menu toggle */
             }
+            .header.collapsed {
+                left: 0;
+            }
             .menu-toggle {
                 display: block;
+            }
+            .toggle-arrow {
+                display: none; /* Hide arrow on mobile */
             }
             .xp-bar-container {
                 width: 150px;
@@ -376,19 +447,22 @@
             <img src="https://cdn-icons-png.flaticon.com/128/2976/2976215.png" alt="Menu Icon">
         </button>
         <div class="sidebar">
+            <button class="toggle-arrow" onclick="toggleSidebarDesktop()">
+                <img src="https://cdn-icons-png.flaticon.com/128/271/271220.png" alt="Arrow Icon">
+            </button>
             <div class="avatar">
                 <img src="https://cdn-icons-png.flaticon.com/128/2964/2964514.png" alt="Avatar">
             </div>
             <h1>Fitness Companion</h1>
             <ul>
-                <li data-page="tasks"><img src="https://cdn-icons-png.flaticon.com/128/1057/1057090.png" alt="Tasks Icon">Tasks</li>
-                <li class="active" data-page="plan"><img src="https://cdn-icons-png.flaticon.com/1087/1087840.png" alt="Plan Icon">Plan</li>
-                <li data-page="workouts"><img src="https://cdn-icons-png.flaticon.com/128/3062/3062634.png" alt="Workouts Icon">Workouts</li>
-                <li data-page="food"><img src="https://cdn-icons-png.flaticon.com/128/1046/1046784.png" alt="Food Icon">Food</li>
-                <li data-page="measurements"><img src="https://cdn-icons-png.flaticon.com/128/2281/2281490.png" alt="Measurements Icon">Measurements</li>
-                <li data-page="history"><img src="https://cdn-icons-png.flaticon.com/128/3503/3503755.png" alt="History Icon">History</li>
-                <li data-page="account"><img src="https://cdn-icons-png.flaticon.com/128/1077/1077063.png" alt="Account Icon">Account</li>
-                <li data-page="settings"><img src="https://cdn-icons-png.flaticon.com/128/124/124033.png" alt="Settings Icon">Settings</li>
+                <li data-page="tasks"><img src="https://cdn-icons-png.flaticon.com/128/1057/1057090.png" alt="Tasks Icon"><span>Tasks</span></li>
+                <li class="active" data-page="plan"><img src="https://cdn-icons-png.flaticon.com/128/1087/1087840.png" alt="Plan Icon"><span>Plan</span></li>
+                <li data-page="workouts"><img src="https://cdn-icons-png.flaticon.com/128/3062/3062634.png" alt="Workouts Icon"><span>Workouts</span></li>
+                <li data-page="food"><img src="https://cdn-icons-png.flaticon.com/128/1046/1046784.png" alt="Food Icon"><span>Food</span></li>
+                <li data-page="measurements"><img src="https://cdn-icons-png.flaticon.com/128/2281/2281490.png" alt="Measurements Icon"><span>Measurements</span></li>
+                <li data-page="history"><img src="https://cdn-icons-png.flaticon.com/128/3503/3503755.png" alt="History Icon"><span>History</span></li>
+                <li data-page="account"><img src="https://cdn-icons-png.flaticon.com/128/1077/1077063.png" alt="Account Icon"><span>Account</span></li>
+                <li data-page="settings"><img src="https://cdn-icons-png.flaticon.com/128/124/124033.png" alt="Settings Icon"><span>Settings</span></li>
             </ul>
             <button class="simulate-btn" onclick="simulateDays()">Simulate Days</button>
             <button class="reset-btn" onclick="resetData()">Reset Data</button>
@@ -534,6 +608,16 @@
         function toggleSidebar() {
             const sidebar = document.querySelector('.sidebar');
             sidebar.classList.toggle('active');
+        }
+
+        // Sidebar Toggle for Desktop (Expand/Collapse)
+        function toggleSidebarDesktop() {
+            const sidebar = document.querySelector('.sidebar');
+            const content = document.querySelector('.content');
+            const header = document.querySelector('.header');
+            sidebar.classList.toggle('collapsed');
+            content.classList.toggle('collapsed');
+            header.classList.toggle('collapsed');
         }
 
         // Navigation
@@ -980,7 +1064,7 @@
         // Settings
         function applySettings() {
             const color = document.getElementById('themeColor').value;
-            document.querySelectorAll('.sidebar li.active, .sidebar li:hover, .task:hover, .plan-item:hover, .comment-box button, .form button, .notification, .xp-bar, h2, .sidebar .simulate-btn, .sidebar h1, .header, .avatar img').forEach(el => {
+            document.querySelectorAll('.sidebar li.active, .sidebar li:hover, .task:hover, .plan-item:hover, .comment-box button, .form button, .notification, .xp-bar, h2, .sidebar .simulate-btn, .sidebar h1, .header, .avatar img, .toggle-arrow').forEach(el => {
                 if (el.tagName === 'H1' || el.tagName === 'H2') el.style.color = color;
                 else if (el.classList.contains('header')) el.style.borderBottomColor = color;
                 else if (el.tagName === 'IMG') el.style.borderColor = color;
